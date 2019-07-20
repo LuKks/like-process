@@ -112,7 +112,7 @@ otherwise will fork a new worker and when it's ready disconnect the old one.
 - Worker/s with cluster module.
 
 #### Description
-It was made to combine with [like-server](https://www.npmjs.com/like-server).
+It was made to combine with [like-server](https://www.npmjs.com/like-server).\
 Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
 Async cleanup when it's possible.\
