@@ -1,0 +1,33 @@
+{
+  "name": "like-process",
+  "version": "0.0.1",
+  "description": "Handle signals for gracefully exit with 100% uptime (cluster compatible)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuKks/like-process.git"
+  },
+  "author": "Lucas Barrena <lucasbarrena@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LuKks/like-process/issues"
+  },
+  "homepage": "https://github.com/LuKks/like-process#readme",
+  "keywords": [
+    "like",
+    "process",
+    "gracefully",
+    "exit",
+    "signals",
+    "uptime",
+    "downtime",
+    "cluster"
+  ],
+  "devDependencies": {},
+  "dependencies": {
+    "debug": "^4.1.1"
+  }
+}
