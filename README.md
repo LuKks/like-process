@@ -112,7 +112,7 @@ otherwise will fork a new worker and when it's ready disconnect the old one.
 - Single process with pm2 cluster.
 - Worker/s with cluster module.
 
-## Description
+#### Description
 It was made to combine with [like-server](https://www.npmjs.com/like-server).\
 Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
