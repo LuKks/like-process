@@ -119,7 +119,7 @@ function terminate(action, code, worker) {
   //worker
   else if(cluster.isWorker) {
     log('is worker', action, code);
-    process.send({ cmd: 'NODE_LIKE_PROCESS', action });
+    process.connected && process.send({ cmd: 'NODE_LIKE_PROCESS', action });
   }
 
   return true;
