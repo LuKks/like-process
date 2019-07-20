@@ -247,7 +247,7 @@ function _ready(set) {
 
 process.once('SIGTERM', like.exit); //swarm, k8s, systemd, etc
 process.once('SIGINT', like.exit); //pm2
-process.once('SIGHUP', like.reload); //systemd, custom, etc
+process.once('SIGUSR2', like.reload); //pm2 fork, systemd, custom, etc
 
 /*
 disable signal:
