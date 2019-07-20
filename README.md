@@ -10,6 +10,42 @@ I made this pre-release to use on my project so it's useful,\
 but I want that the library handles all the cases easily.\
 I need more time to do some changes, remove useless code, etc.
 
+## Install
+```
+npm i like-process
+```
+
+## Features
+#### Handles signals by default:
+- Exit with SIGTERM: swarm, k8s, systemd, etc.
+- Exit with SIGINT: pm2.
+- Reload with SIGHUP: custom, systemd, etc.
+
+Also can send a signal to specific worker or single process.\
+When you do a reload in single process it's equal than doing an exit,\
+otherwise will fork a new worker and when it's ready disconnect the old one.
+
+#### Optionally handle resources (interval, timeout, etc) with:
+- `'terminate'` and `'cleanup'` event.
+- `like.terminated` and `like.cleanup` states.
+
+`terminate`: process want to exit due signal, uncaught ex., like.exit/reload(), etc.\
+`cleanup`: servers closed, worker disconnected, beforeExit or exit (whatever comes first).
+
+#### Compatible:
+- Single process with replicated containers.
+- Single process with pm2 cluster.
+- Worker/s with cluster module.
+
+#### Description
+It was made to combine with [like-server](https://www.npmjs.com/like-server).\
+Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
+Should be enough for all the cases using the different events and states.\
+Async cleanup when it's possible.\
+Using pm2 will send the ready signal when all servers are listening.\
+Using cluster module there is also an internal ready signal.
+
+## Examples
 ```javascript
 const like = require('like-process');
 
@@ -85,42 +121,6 @@ like.handle([serverA, 'disconnect', 'uncaughtException', 'beforeExit', 'exit'], 
 });
 ```
 
-## Install
-```
-npm i like-process
-```
-
-## Features
-#### Handles signals by default:
-- Exit with SIGTERM: swarm, k8s, systemd, etc.
-- Exit with SIGINT: pm2.
-- Reload with SIGHUP: custom, systemd, etc.
-
-Also can send a signal to specific worker or single process.\
-When you do a reload in single process it's equal than doing an exit,\
-otherwise will fork a new worker and when it's ready disconnect the old one.
-
-#### Optionally handle resources (interval, timeout, etc) with:
-- `'terminate'` and `'cleanup'` event.
-- `like.terminated` and `like.cleanup` states.
-
-`terminate`: process want to exit due signal, uncaught ex., like.exit/reload(), etc.\
-`cleanup`: servers closed, worker disconnected, beforeExit or exit (whatever comes first).
-
-#### Compatible:
-- Single process with replicated containers.
-- Single process with pm2 cluster.
-- Worker/s with cluster module.
-
-#### Description
-It was made to combine with [like-server](https://www.npmjs.com/like-server).\
-Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
-Should be enough for all the cases using the different events and states.\
-Async cleanup when it's possible.\
-Using pm2 will send the ready signal when all servers are listening.\
-Using cluster module there is also an internal ready signal.
-
-## Examples
 It's a pre-release, the usage can change and there is a lot of cases,\
 so I did not write more examples for this moment.\
 \
