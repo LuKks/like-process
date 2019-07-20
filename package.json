@@ -21,6 +21,7 @@
     "process",
     "gracefully",
     "exit",
+    "events",
     "signals",
     "uptime",
     "downtime",
