@@ -7,7 +7,7 @@ Handle signals for gracefully exit with 100% uptime (cluster compatible)
 ### I'm still working on it.
 
 I made this pre-release to use on my project so it's useful,\
-but I want that the library handles all the cases easily.
+but I want that the library handles all the cases easily.\
 I need more time to do some changes, remove useless code, etc.
 
 ```javascript
