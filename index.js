@@ -266,15 +266,13 @@ function _ready(set) {
   }
 }
 
-process.once('SIGTERM', like.exit); //swarm, k8s, systemd, etc
-process.once('SIGINT', like.exit); //pm2
-process.once('SIGUSR2', like.reload); //systemd, custom, etc
+process.once('SIGTERM', like.exit); //swarm, k8s, etc
+process.once('SIGINT', like.exit); //pm2 cluster
 
 /*
 disable signal:
 process.removeListener('SIGTERM', like.exit);
 process.removeListener('SIGINT', like.exit);
-process.removeListener('SIGUSR2', like.reload);
 */
 
 module.exports = like;
