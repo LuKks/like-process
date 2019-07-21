@@ -18,8 +18,8 @@ npm i like-process
 ## Features
 #### Handles signals by default:
 - Exit with SIGTERM: swarm, k8s, systemd, etc.
-- Exit with SIGINT: pm2.
-- Reload with SIGHUP: custom, systemd, etc.
+- Exit with SIGINT: pm2 cluster.
+- Reload with SIGUSR2: native cluster, systemd, custom, etc.
 
 Also can send a signal to specific worker or single process.\
 When you do a reload in single process it's equal than doing an exit,\
@@ -32,20 +32,20 @@ otherwise will fork a new worker and when it's ready disconnect the old one.
 `terminate`: process want to exit due signal, uncaught ex., like.exit/reload(), etc.\
 `cleanup`: servers closed, worker disconnected, beforeExit or exit (whatever comes first).
 
-#### Compatible:
+#### Compatible with:
 - Single process with replicated containers.
-- Single process with pm2 cluster.
-- Worker/s with cluster module.
+- PM2 cluster.
+- Native cluster module.
 
 #### Description
 It was made to combine with [like-server](https://www.npmjs.com/like-server).\
 Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
-Async cleanup when it's possible.\
+Async cleanup when it's possible, always except when `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
 Using cluster module there is also an internal ready signal.
 
-## Examples
+## Example with native cluster
 ```javascript
 const like = require('like-process');
 
@@ -77,7 +77,7 @@ setTimeout(() => {
   //like.reload(); //reload, also can set an exitCode
 
   //process.kill(process.pid, 'SIGTERM'); //exit by signal
-  //process.kill(process.pid, 'SIGHUP'); //reload by signal
+  //process.kill(process.pid, 'SIGUSR2'); //reload by signal
 
   //process.exit(); //the cleanup can't be async with it
 }, 1);
@@ -120,6 +120,12 @@ like.handle([serverA, 'disconnect', 'uncaughtException', 'beforeExit', 'exit'], 
   }
 });
 ```
+
+## Example with PM2
+With the previous example, remove `this_var_not_exists;`\
+Start a process with cluster mode: `pm2 start example.js -i 2`\
+Reload when you want: `pm2 reload example`\
+The logs can be confusing due PM2 but stop, flush and you can see better.
 
 It's a pre-release, the usage can change and there is a lot of cases,\
 so I did not write more examples for this moment.\
