@@ -39,7 +39,7 @@ Reload in single process it's equal than doing an exit.
 It was made to combine with [like-server](https://www.npmjs.com/like-server).\
 Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
-`'terminate'` and `'cleanup'` are possibly async except against `process.exit()`.\
+`'terminate'` and `'cleanup'` are async except against `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
 Using cluster module there is also an internal ready signal.
 
