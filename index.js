@@ -232,7 +232,6 @@ function handler(callback, event, arg1, arg2) {
   //wasn't manually, for example, was an uncaught exception
   if(!like.terminated) {
     log('wasnt manually');
-    !like.isCluster ? like.exit() : like.reload();
   }
 
   //the first event without servers listening or forced exit will turn cleanup
