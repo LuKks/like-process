@@ -122,7 +122,7 @@ like.handle([serverA, 'disconnect', 'uncaughtException', 'beforeExit', 'exit'], 
 ## Example with PM2
 With the previous example, remove `this_var_not_exists;`\
 Start process as cluster mode: `pm2 start example.js -i 2 --kill-timeout 7000`\
-Reload when you want: `pm2 reload example`\
+Reload when you want: `pm2 reload example`
 
 `kill-timeout` at 7000? You absolutely need [like-server](https://www.npmjs.com/like-server) to solve that.\
 It's due the `/long` request, normally can be long-polling or other tasks.
