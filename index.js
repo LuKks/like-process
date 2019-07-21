@@ -141,16 +141,17 @@ let servers = [];
 function exit(worker) {
   log('exit process', worker ? worker.process.pid : process.pid);
 
+  //single process or worker
+  if(!like.isCluster || cluster.isWorker) {
+    for(let i = 0; i < servers.length; i++) {
+      servers[i].close();
+    }
+  }
+
   //master to specific worker object or worker itself
   if(worker) {
     log('disconnecting worker');
     return worker.disconnect();
-  }
-  //single process
-  else {
-    for(let i = 0; i < servers.length; i++) {
-      servers[i].close();
-    }
   }
 }
 
