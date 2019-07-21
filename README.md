@@ -39,7 +39,7 @@ Reload in single process it's equal than doing an exit.
 It was made to combine with [like-server](https://www.npmjs.com/like-server).\
 Extremely useful when you have deployment with Docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
-Async cleanup except against `process.exit()`.\
+`'terminate'` and `'cleanup'` are possibly async except against `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
 Using cluster module there is also an internal ready signal.
 
@@ -121,8 +121,11 @@ like.handle([serverA, 'disconnect', 'uncaughtException', 'beforeExit', 'exit'], 
 
 ## Example with PM2
 With the previous example, remove `this_var_not_exists;`\
-Start a process with cluster mode: `pm2 start example.js -i 2`\
+Start process as cluster mode: `pm2 start example.js -i 2 --kill-timeout 7000`\
 Reload when you want: `pm2 reload example`\
+
+`kill-timeout` at 7000? You absolutely need [like-server](https://www.npmjs.com/like-server) to solve that.\
+It's due the `/long` request, normally can be long-polling or other tasks.
 
 ## It's a pre-release!
 The usage can change and there is a lot of cases,\
