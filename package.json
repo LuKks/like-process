@@ -1,6 +1,6 @@
 {
   "name": "like-process",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Handle events for gracefully exit with 100% uptime (cluster compatible)",
   "main": "index.js",
   "scripts": {
