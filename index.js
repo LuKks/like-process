@@ -232,6 +232,7 @@ function handler(callback, event, arg1, arg2) {
   //wasn't manually, for example, was an uncaught exception
   if(!like.terminated) {
     log('wasnt manually');
+    process.env.LIKE_PROCESS_FORK ? like.reload() : like.exit();
   }
 
   //the first event without servers listening or forced exit will turn cleanup
