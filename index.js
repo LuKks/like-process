@@ -124,12 +124,12 @@ function terminate(action, code, worker) {
   else if(cluster.isWorker) {
     log('is worker', action, code);
 
-    if(action === 'exit') {
-      exit(cluster.worker);
-    }
-
     if(process.env.LIKE_PROCESS_FORK && process.connected) {
       process.send({ cmd: 'NODE_LIKE_PROCESS', action });
+    }
+
+    if(action === 'exit') {
+      exit(cluster.worker);
     }
   }
 
