@@ -39,11 +39,15 @@ like.fork = function(env) {
     return;
   }
 
+  env = Object.assign({
+    LIKE_PROCESS_FORK: true
+  }, env);
+
   let worker = cluster.fork(env);
   worker.$env = env;
 
   worker.process.on('internalMessage', function onTerminate(msg) {
-    if(msg.cmd === 'NODE_LIKE_PROCESS' && (msg.action === 'exit' || msg.action === 'reload')) {
+    if(msg.cmd === 'NODE_LIKE_PROCESS' && (/*msg.action === 'exit' || */msg.action === 'reload')) {
       log('worker want to', msg.action);
 
       //worker.process.removeListener('internalMessage', onTerminate);
@@ -102,10 +106,10 @@ function terminate(action, code, worker) {
     return exit();
   }
   //master
-  else if(cluster.isMaster) {
+  else if(cluster.isMaster && action === 'reload') {
     if(worker) {
       log('is master to worker', action, code);
-      return action === 'exit' ? exit(worker) : reload(worker);
+      return /*action === 'exit' ? exit(worker) : */reload(worker);
     }
     else {
       log('is master to all', action, code);
@@ -119,7 +123,14 @@ function terminate(action, code, worker) {
   //worker
   else if(cluster.isWorker) {
     log('is worker', action, code);
-    process.connected && process.send({ cmd: 'NODE_LIKE_PROCESS', action });
+
+    if(action === 'exit') {
+      exit(cluster.worker);
+    }
+
+    if(process.env.LIKE_PROCESS_FORK && process.connected) {
+      process.send({ cmd: 'NODE_LIKE_PROCESS', action });
+    }
   }
 
   return true;
@@ -130,7 +141,7 @@ let servers = [];
 function exit(worker) {
   log('exit process', worker ? worker.process.pid : process.pid);
 
-  //master to specific worker object
+  //master to specific worker object or worker itself
   if(worker) {
     log('disconnecting worker');
     return worker.disconnect();
@@ -160,7 +171,17 @@ function reload(worker) {
 
 like.ready = function() {
   log('its ready', process.pid);
-  process.send && process.send(cluster.isWorker ? { cmd: 'NODE_LIKE_PROCESS', action: 'ready' } : 'ready');
+
+  if(!cluster.isWorker || !process.connected) {
+    return;
+  }
+
+  if(process.env.PM2_HOME && process.env.wait_ready) {
+    process.send('ready');
+  }
+  else if(process.env.LIKE_PROCESS_FORK) {
+    process.send({ cmd: 'NODE_LIKE_PROCESS', action: 'ready' });
+  }
 }
 
 let wait_listening = false;
@@ -247,7 +268,7 @@ function _ready(set) {
 
 process.once('SIGTERM', like.exit); //swarm, k8s, systemd, etc
 process.once('SIGINT', like.exit); //pm2
-process.once('SIGUSR2', like.reload); //pm2 fork, systemd, custom, etc
+process.once('SIGUSR2', like.reload); //systemd, custom, etc
 
 /*
 disable signal:
