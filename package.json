@@ -1,6 +1,6 @@
 {
   "name": "like-process",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Handle events and resources for gracefully exit",
   "main": "index.js",
   "scripts": {
