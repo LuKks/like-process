@@ -1,7 +1,7 @@
 {
   "name": "like-process",
   "version": "1.0.0",
-  "description": "Handle events for gracefully exit with 100% uptime (cluster compatible)",
+  "description": "Handle events and resources for gracefully exit",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
