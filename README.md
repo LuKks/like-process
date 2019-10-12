@@ -4,7 +4,6 @@ Handle events for gracefully exit with 100% uptime (cluster compatible)
 
 ![](https://img.shields.io/npm/v/like-process.svg) [![](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square)](https://github.com/LuKks/like-process) ![](https://img.shields.io/github/size/lukks/like-process/index.js.svg) ![](https://img.shields.io/npm/dt/like-process.svg) ![](https://img.shields.io/github/license/LuKks/like-process.svg)
 
-Handle servers, timers, events, cluster and more resources in an easy way.
 ```javascript
 const like = require('like-process');
 
