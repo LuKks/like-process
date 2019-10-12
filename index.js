@@ -6,24 +6,22 @@
 
 'use strict';
 
-let like = new (require('events'))();
+const cluster = require('cluster');
+const EventEmitter = require('events');
+const os = require('os');
+
+let like = new EventEmitter();
 
 like.terminated = false;
 like.cleanup = false;
+like.fallback = true;
 
-const debug = require('debug');
-const log = debug('like-process');
-//debug.enable('like-process');
-
-const cluster = require('cluster');
 like.isCluster = cluster.isWorker; //is worker or master with at least 1 fork
 like.isMaster = cluster.isMaster;
 like.isWorker = cluster.isWorker;
 
 like.fork = function(env) {
-  if(!cluster.isMaster) {
-    return;
-  }
+  if(!cluster.isMaster) return;
 
   env = Object.assign({
     LIKE_PROCESS_FORK: true
@@ -32,17 +30,13 @@ like.fork = function(env) {
   let worker = cluster.fork(env);
   worker.$env = env;
 
-  worker.process.on('internalMessage', function onTerminate(msg) {
-    if(msg.cmd === 'NODE_LIKE_PROCESS' && (/*msg.action === 'exit' || */msg.action === 'reload')) {
-      log('worker want to', msg.action);
-
-      //worker.process.removeListener('internalMessage', onTerminate);
-      like[msg.action](undefined, worker);
-    }
+  worker.process.on('internalMessage', msg => {
+    if(msg.cmd !== 'NODE_LIKE_PROCESS') return;
+    if(msg.action === 'exit') like.exit(undefined, worker);
+    else if(msg.action === 'reload') like.reload(undefined, worker);
   });
 
   like.isCluster = true;
-
   return worker;
 }
 
@@ -52,69 +46,48 @@ like.reload = terminate.bind(null, 'reload');
 function terminate(action, code, worker) {
   worker = typeof worker === 'object' ? worker : undefined;
 
-  //temp fix; I don't like when I do a ctrl+c and doesn't exit instantly
-  //but SIGINT it's for pm2 so we only check if process.send not exists
-  if(code/*signal*/ === 'SIGINT' && !process.send) {
-    return process.exit(1);
-  }
-
   //single process or worker
-  if(!like.isCluster || cluster.isWorker) {
-    if(isFinite(code)) {
-      process.exitCode = code;
-    }
+  if((!like.isCluster || cluster.isWorker) && isFinite(code)) {
+    process.exitCode = code;
   }
 
   //avoid multiple executions
-  if(like.terminated || worker && worker.$terminated) {
-    log('terminate: called again', action);
+  if(like.terminated || worker && worker.terminated) {
     return;
   }
 
   //single process or worker
   if(!like.isCluster || cluster.isWorker) {
-    log('terminate: saving process/worker action', action);
-
     like.terminated = true;
     like.emit('terminate');
   }
   //master to specific worker object
   else if(worker) {
-    log('terminate: saving master-worker action', action);
-
-    worker.$terminated = true;
+    worker.terminated = true;
     like.emit('terminate', worker);
   }
 
   //single process
   if(!like.isCluster) {
-    log('is not cluster', action, code);
     return exit();
   }
   //master
-  else if(cluster.isMaster && action === 'reload') {
+  else if(cluster.isMaster) {
     if(worker) {
-      log('is master to worker', action, code);
-      return /*action === 'exit' ? exit(worker) : */reload(worker);
+      return action === 'exit' ? exit(worker) : reload(worker);
     }
     else {
-      log('is master to all', action, code);
-
       for(let id in cluster.workers) {
-        log('master to worker with', action, code);
         terminate(action, code, cluster.workers[id]);
       }
     }
   }
   //worker
   else if(cluster.isWorker) {
-    log('is worker', action, code);
-
-    if(process.env.LIKE_PROCESS_FORK && process.connected) {
-      process.send({ cmd: 'NODE_LIKE_PROCESS', action });
+    if(process.env.LIKE_PROCESS_FORK) {
+      process.connected && process.send({ cmd: 'NODE_LIKE_PROCESS', action });
     }
-
-    if(action === 'exit') {
+    else {
       exit(cluster.worker);
     }
   }
@@ -125,11 +98,8 @@ function terminate(action, code, worker) {
 let servers = [];
 
 function exit(worker) {
-  log('exit process', worker ? worker.process.pid : process.pid);
-
   //master to specific worker object or worker itself
   if(worker) {
-    log('disconnecting worker');
     return worker.disconnect();
   }
   //single process
@@ -141,44 +111,29 @@ function exit(worker) {
 }
 
 function reload(worker) {
-  log('reload process', process.pid);
-
-  let newer = like.fork(worker.$env);
-
-  newer.process.on('internalMessage', function onReady(msg) {
-    if(msg.cmd === 'NODE_LIKE_PROCESS' && msg.action === 'ready') {
-      log('newer started, disconnecting old worker');
-
-      newer.process.removeListener('internalMessage', onReady);
-      exit(worker);
-    }
-  });
-}
-
-like.ready = function() {
-  log('its ready', process.pid);
-
-  if(!cluster.isWorker || !process.connected) {
+  if(!worker.$env) {
     return;
   }
 
-  if(process.env.PM2_HOME && process.env.wait_ready) {
-    process.send('ready');
-  }
-  else if(process.env.LIKE_PROCESS_FORK) {
-    process.send({ cmd: 'NODE_LIKE_PROCESS', action: 'ready' });
+  if(worker.$env.LIKE_PROCESS_FORK) {
+    let newer = like.fork(worker.$env);
+
+    //wait ready signal from new worker then exit old worker
+    newer.process.on('internalMessage', function onReady(msg) {
+      if(msg.cmd === 'NODE_LIKE_PROCESS' && msg.action === 'ready') {
+        newer.process.removeListener('internalMessage', onReady);
+        exit(worker);
+      }
+    });
   }
 }
 
-let wait_listening = false;
+let waitListening = false;
 let immediateReady;
 
 like.handle = function(events, callback) {
-  if(!callback) {
-    callback = (evt, arg1) => {};
-  }
-
-  log('handle', cluster.isMaster ? 'master' : 'worker', events.map(v => typeof v !== 'object' ? v : 'server'));
+  if(!Array.isArray(events)) events = [events];
+  if(!callback) callback = (evt, arg1) => {};
 
   for(let k in events) {
     //server/s object (multi listening ready and server close event)
@@ -186,13 +141,11 @@ like.handle = function(events, callback) {
       let server = events[k];
 
       if(servers.indexOf(server) === -1) {
-        log('server push');
         servers.push(server);
 
         if(!server.listening) {
-          log('waiting for listening');
-          wait_listening = true;
-          server.once('listening', multi_listening_ready);
+          waitListening = true;
+          server.once('listening', multiListeningReady);
         }
       }
 
@@ -204,12 +157,10 @@ like.handle = function(events, callback) {
     }
   }
 
-  _ready(!wait_listening);
+  _ready(!waitListening);
 }
 
 function handler(callback, event, arg1, arg2) {
-  log('event', typeof event === 'object' ? 'its server object' : event);
-
   //server closed
   if(event === 'server') {
     servers.splice(servers.indexOf(arg1), 1);
@@ -217,30 +168,36 @@ function handler(callback, event, arg1, arg2) {
   
   //wasn't manually, for example, was an uncaught exception
   if(!like.terminated) {
-    log('wasnt manually');
-    process.env.LIKE_PROCESS_FORK ? like.reload() : like.exit();
+    !like.isCluster || !like.fallback ? like.exit() : like.reload();
   }
 
   //the first event without servers listening or forced exit will turn cleanup
   if(!like.cleanup && (!servers.length || event === 'exit')) {
-    log('turning cleanup');
-
     like.cleanup = true;
     like.emit('cleanup');
   }
 
-  //
   callback.call(null, event, arg1, arg2);
 }
 
-function multi_listening_ready() {
+function sendReady() {
+  if(!cluster.isWorker || !process.connected) return;
+  
+  if(process.env.LIKE_PROCESS_FORK) {
+    process.send({ cmd: 'NODE_LIKE_PROCESS', action: 'ready' });
+  }
+  if(process.env.PM2_HOME && process.env.wait_ready) {
+    process.send('ready');
+  }
+}
+
+function multiListeningReady() {
   for(let i = 0; i < servers.length; i++) {
     if(!servers[i].listening) {
       return;
     }
   }
 
-  log('all servers listening');
   _ready(true);
 }
 
@@ -248,17 +205,14 @@ function _ready(set) {
   clearImmediate(immediateReady);
 
   if(set) {
-    immediateReady = setImmediate(like.ready);
+    immediateReady = setImmediate(sendReady);
   }
 }
 
-process.once('SIGTERM', like.exit); //swarm, k8s, etc
-process.once('SIGINT', like.exit); //pm2 cluster
-
-/*
-disable signal:
-process.removeListener('SIGTERM', like.exit);
-process.removeListener('SIGINT', like.exit);
-*/
+process.on('SIGTERM', like.exit); //swarm, k8s, systemd, etc
+if(process.env.PM2_HOME && process.env.exec_mode === 'cluster_mode') {
+  process.on('SIGINT', like.exit); //pm2 cluster
+}
+process.on('SIGHUP', like.reload); //native cluster, systemd, etc
 
 module.exports = like;
