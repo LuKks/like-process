@@ -55,7 +55,7 @@ Also can use pm2 cluster or containers with single process but\
 need enough workers/containers for good redundancy in case of failures.
 
 #### Description
-It was made to combine with [like-server](https://www.npmjs.com/like-server).\
+It was made to combine with [like-server](https://github.com/LuKks/like-server).\
 Extremely useful when have deployment with docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
 `'terminate'` and `'cleanup'` are async except against `process.exit()`.\
