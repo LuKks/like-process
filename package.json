@@ -28,7 +28,5 @@
     "cluster"
   ],
   "devDependencies": {},
-  "dependencies": {
-    "debug": "^4.1.1"
-  }
+  "dependencies": {}
 }
