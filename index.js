@@ -20,20 +20,6 @@ like.isCluster = cluster.isWorker; //is worker or master with at least 1 fork
 like.isMaster = cluster.isMaster;
 like.isWorker = cluster.isWorker;
 
-like.cluster = function(count, env) {
-  if(cluster.isMaster) {
-    return;
-  }
-
-  count = count === true ? require('os').cpus().length : (Number(count) || 1);
-
-  for(let i = 0; i < count; i++) {
-    like.fork(env);
-  }
-
-  return true;
-}
-
 like.fork = function(env) {
   if(!cluster.isMaster) {
     return;
