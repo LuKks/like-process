@@ -59,7 +59,8 @@ Extremely useful when have deployment with docker, pm2, k8s, etc.\
 Should be enough for all the cases using the different events and states.\
 `'terminate'` and `'cleanup'` are async except against `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
-Using cluster module there is also an internal ready signal.
+Using cluster module there is also an internal ready signal.\
+Handling uncaughtException or unhandledRejection the default exitCode is 1.
 
 ## Examples
 In the folder [examples](https://github.com/LuKks/like-process/blob/master/examples) there is a lot of cases.\

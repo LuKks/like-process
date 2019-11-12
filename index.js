@@ -15,6 +15,10 @@ let like = new EventEmitter();
 like.terminated = false;
 like.cleanup = false;
 like.fallback = true;
+like.exitCode = {
+  exception: 1,
+  rejection: 1
+};
 
 like.isCluster = cluster.isWorker; //is worker or master with at least 1 fork
 like.isMaster = cluster.isMaster;
@@ -161,6 +165,18 @@ like.handle = function(events, callback) {
 }
 
 function handler(callback, event, arg1, arg2) {
+  if (process.exitCode === undefined) {
+    // exit code for uncaught exception
+    if (event === 'uncaughtException' && typeof like.exitCode.exception === 'number') {
+      process.exitCode = like.exitCode.exception;
+    }
+
+    // exit code for unhandled rejection
+    if (event === 'unhandledRejection' && typeof like.exitCode.rejection === 'number') {
+      process.exitCode = like.exitCode.rejection;
+    }
+  }
+
   //server closed
   if(event === 'server') {
     servers.splice(servers.indexOf(arg1), 1);
