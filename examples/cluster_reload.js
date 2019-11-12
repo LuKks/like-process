@@ -9,13 +9,12 @@ if(like.isMaster) {
 
 setTimeout(() => like.reload(/*optional exitCode*/), 2000);
 
-let count = 0;
 let intervalId = setInterval(() => {
-  console.log('count', count++);
+  console.log('count');
 }, 500);
 
 like.on('cleanup', () => {
-  console.log(NAME, process.pid, 'cleanup at', count);
+  console.log(NAME, process.pid, 'cleanup');
   clearInterval(intervalId);
 });
 

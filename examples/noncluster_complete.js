@@ -30,7 +30,7 @@ like.handle([/*serverA, */'disconnect', 'uncaughtException', 'exit'], (evt, arg1
   }*/
  
   if(evt === 'uncaughtException') {
-    process.stderr.write(/*err*/arg1.stack + '\n');
+    console.error(arg1);
   }
  
   if(evt === 'exit') {

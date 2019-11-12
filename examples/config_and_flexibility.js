@@ -36,7 +36,7 @@ like.on('cleanup', () => {
 });
 
 like.handle('uncaughtException', (evt, arg1) => {
-  process.stderr.write(arg1.stack + '\n');
+  console.error(arg1);
 });
 
 setTimeout(() => {

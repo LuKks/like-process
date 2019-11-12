@@ -19,7 +19,7 @@ like.handle([serverA, 'uncaughtException'], (evt, arg1) => {
   }
 
   if(evt === 'uncaughtException') {
-    process.stderr.write(arg1.stack + '\n');
+    console.error(arg1);
   }
 });
 

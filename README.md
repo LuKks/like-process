@@ -9,18 +9,17 @@ const like = require('like-process');
 
 setTimeout(() => this_var_not_exists, 2000);
 
-let count = 0;
 let intervalId = setInterval(() => {
-  console.log('count', count++);
+  console.log('count');
 }, 500);
 
 like.on('cleanup', () => {
-  console.log('cleanup at', count);
+  console.log('cleanup');
   clearInterval(intervalId);
 });
 
-like.handle('uncaughtException', (evt, arg1) => {
-  process.stderr.write(arg1.stack + '\n');
+like.handle('uncaughtException', (evt, err) => {
+  console.error(err);
 });
 ```
 
