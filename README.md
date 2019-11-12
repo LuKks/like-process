@@ -96,11 +96,11 @@ like.handle(['uncaughtException', 'unhandledRejection'], (evt, err) => {
 You can handle more events like disconnect (cluster) or beforeExit.
 
 If an event occurs then:
-- 1. `like.terminated` state is setted and `'terminate'` event is emitted
-- 2. On cluster: will worker.disconnect() which also close servers
-- 2. On non-cluster: all handled servers will server.close()
+- `like.terminated` state is setted and `'terminate'` event is emitted
+- On cluster: will worker.disconnect() which also close servers
+- On non-cluster: all handled servers will server.close()
 - When all servers are closed:
-- 3. `like.cleanup` state is setted and `'cleanup'` event is emitted
+- `like.cleanup` state is setted and `'cleanup'` event is emitted
 - Here we have the event loop empty so it really gracefully exit
 
 Why I use [like-server](https://github.com/LuKks/like-server)?
