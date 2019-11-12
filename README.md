@@ -69,9 +69,8 @@ Also check the [examples/config_and_flexibility.js](https://github.com/LuKks/lik
 Almost all the examples has an uncaught exception, `like.reload()`, etc\
 in that way the process will reload or exit for demonstration purposes.
 
-Most examples uses terminate and cleanup events, examples using states:
-- [examples/noncluster_loop.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_loop.js)
-- [examples/noncluster_error.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_error.js)
+Most examples uses terminate and cleanup events, examples using states:\
+[examples/noncluster_loop.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_loop.js) and [examples/noncluster_error.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_error.js)
 
 ## How it works?
 There are too much ways to use it due cluster and more situations.\
@@ -97,14 +96,14 @@ like.handle(['uncaughtException', 'unhandledRejection'], (evt, err) => {
 You can handle more events like disconnect (cluster) or beforeExit.
 
 If an event occurs then:
-- 1) `like.terminated` state is setted and `'terminate'` event is emitted
-- 2.A) On cluster: will worker.disconnect() which also close servers
-- 2.B) On non-cluster: all handled servers will server.close()
+1) `like.terminated` state is setted and `'terminate'` event is emitted
+2) On cluster: will worker.disconnect() which also close servers
+2) On non-cluster: all handled servers will server.close()
 - When all servers are closed:
-- 3) `like.cleanup` state is setted and `'cleanup'` event is emitted
+3) `like.cleanup` state is setted and `'cleanup'` event is emitted
 - Here we have the event loop empty so it really gracefully exit
 
-Why I use [like-server](https://github.com/LuKks/like-server)?\
+Why I use [like-server](https://github.com/LuKks/like-server)?
 - Servers and sockets are also treated as resources because they have:
 - At server.close() `'terminate'` event and `terminated` state
 - On that way we can clear the event loop instantly
