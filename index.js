@@ -8,7 +8,6 @@
 
 const cluster = require('cluster');
 const EventEmitter = require('events');
-const os = require('os');
 
 let like = new EventEmitter();
 
@@ -19,13 +18,16 @@ like.exitCode = {
   exception: 1,
   rejection: 1
 };
-
-like.isCluster = cluster.isWorker; // is worker or master with at least 1 fork
 like.isMaster = cluster.isMaster;
 like.isWorker = cluster.isWorker;
+like.isCluster = cluster.isWorker; // is worker or master with at least 1 fork
+
+let servers = [];
+let immediateReadyId;
 
 like.fork = function (env) {
   if (!cluster.isMaster) return;
+  like.isCluster = true;
 
   env = Object.assign({
     LIKE_PROCESS_FORK: true
@@ -40,9 +42,8 @@ like.fork = function (env) {
     else if (msg.action === 'reload') like.reload(undefined, worker);
   });
 
-  like.isCluster = true;
   return worker;
-}
+};
 
 like.exit = terminate.bind(null, 'exit');
 like.reload = terminate.bind(null, 'reload');
@@ -67,10 +68,10 @@ function terminate (action, code, worker) {
   }
 
   if (!like.isCluster) {
-    return exit();
+    exit();
   } else if (cluster.isMaster) {
     if (worker) {
-      return action === 'exit' ? exit(worker) : reload(worker);
+      action === 'exit' ? exit(worker) : reload(worker);
     } else {
       for (let id in cluster.workers) {
         terminate(action, code, cluster.workers[id]);
@@ -83,15 +84,11 @@ function terminate (action, code, worker) {
       exit(cluster.worker);
     }
   }
-
-  return true;
 }
-
-let servers = [];
 
 function exit (worker) {
   if (worker) {
-    return worker.disconnect();
+    worker.disconnect();
   } else {
     for (let i = 0; i < servers.length; i++) {
       servers[i].close();
@@ -100,10 +97,8 @@ function exit (worker) {
 }
 
 function reload (worker) {
-  if (!worker.$env) {
-    return;
-  }
-  
+  if (!worker.$env) return;
+
   if (worker.$env.LIKE_PROCESS_FORK) {
     let newer = like.fork(worker.$env);
 
@@ -117,9 +112,6 @@ function reload (worker) {
   }
 }
 
-let waitListening = false;
-let immediateReady;
-
 like.handle = function (events, callback) {
   if (!Array.isArray(events)) events = [events];
   if (!callback) callback = (evt, arg1) => {};
@@ -132,8 +124,7 @@ like.handle = function (events, callback) {
         servers.push(server);
 
         if (!server.listening) {
-          waitListening = true;
-          server.once('listening', multiListeningReady);
+          server.once('listening', immediateReady);
         }
       }
 
@@ -143,8 +134,8 @@ like.handle = function (events, callback) {
     }
   }
 
-  _ready(!waitListening);
-}
+  immediateReady();
+};
 
 function handler (callback, event, arg1, arg2) {
   if (process.exitCode === undefined) {
@@ -173,7 +164,17 @@ function handler (callback, event, arg1, arg2) {
     like.emit('cleanup');
   }
 
-  callback.call(null, event, arg1, arg2);
+  callback(event, arg1, arg2);
+}
+
+function immediateReady () {
+  for (let i = 0; i < servers.length; i++) {
+    if (!servers[i].listening) {
+      return;
+    }
+  }
+  clearImmediate(immediateReadyId);
+  immediateReadyId = setImmediate(sendReady);
 }
 
 function sendReady () {
@@ -184,24 +185,6 @@ function sendReady () {
   }
   if (process.env.PM2_HOME && process.env.wait_ready) {
     process.send('ready');
-  }
-}
-
-function multiListeningReady() {
-  for (let i = 0; i < servers.length; i++) {
-    if (!servers[i].listening) {
-      return;
-    }
-  }
-
-  _ready(true);
-}
-
-function _ready(set) {
-  clearImmediate(immediateReady);
-
-  if(set) {
-    immediateReady = setImmediate(sendReady);
   }
 }
 
