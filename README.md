@@ -62,6 +62,28 @@ Using pm2 will send the ready signal when all servers are listening.\
 Using cluster module there is also an internal ready signal.\
 Handling uncaughtException or unhandledRejection the default exitCode is 1.
 
+#### Properties
+```javascript
+like.terminated: Boolean
+like.cleanup: Boolean
+like.fallback: Boolean
+like.exitCode: {
+  exception: Number
+  rejection: Number
+}
+like.isCluster: Boolean
+like.isMaster: Boolean
+like.isWorker: Boolean
+```
+
+#### Methods
+```javascript
+like.fork(env?: Object): Object
+like.exit(code?: Number, worker?: Object): undefined
+like.reload(code?: Number, worker?: Object): undefined
+like.handle(events: Array|Object|String, callback?: Function): undefined
+```
+
 ## Examples
 In the folder [examples](https://github.com/LuKks/like-process/blob/master/examples) there is a lot of cases.\
 Also check the [examples/config_and_flexibility.js](https://github.com/LuKks/like-process/blob/master/examples/config_and_flexibility.js).
