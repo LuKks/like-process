@@ -40,9 +40,6 @@ Reload or SIGHUP in single process will just exit.
 - `'terminate'` and `'cleanup'` event.
 - `like.terminated` and `like.cleanup` states.
 
-`terminate`: process want to exit due signal, uncaught ex., like.exit/reload(), etc.\
-`cleanup`: servers closed, worker disconnected, beforeExit or exit (whatever comes first).
-
 `cleanup` event and state are only for single process or worker but not master.
 
 #### Fallback start-first redundancy with:
@@ -115,7 +112,7 @@ like.handle(['uncaughtException', 'unhandledRejection'], (evt, err) => {
   console.error(err);
 });
 ```
-You can handle more events like disconnect (cluster) or beforeExit.
+You can handle more events like disconnect (cluster), beforeExit and exit.
 
 If an event occurs then:
 - `like.terminated` state is setted and `'terminate'` event is emitted
