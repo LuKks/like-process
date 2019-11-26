@@ -30,7 +30,7 @@ npm i like-process
 
 ## Features
 #### Handled signals by default:
-- SIGTERM exit for swarm, k8s, etc.
+- SIGTERM exit for docker, k8s, etc.
 - SIGINT exit only when pm2 cluster.
 - SIGHUP reload for native cluster.
 
@@ -47,16 +47,11 @@ Reload or SIGHUP in single process will just exit.
 - PM2 fork + native cluster.
 - Container + native cluster.
 
-Also can use pm2 cluster or containers with single process but\
-need enough workers/containers for good redundancy in case of failures.
-
 #### Description
 It was made to combine with [like-server](https://github.com/LuKks/like-server).\
-Extremely useful when have deployment with docker, pm2, k8s, etc.\
-Should be enough for all the cases using the different events and states.\
 `'terminate'` and `'cleanup'` are async except against `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
-Using cluster module there is also an internal ready signal.\
+Using native cluster there is also an internal ready signal.\
 Handling uncaughtException or unhandledRejection the default exitCode is 1.
 
 #### Properties
