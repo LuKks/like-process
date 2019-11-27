@@ -7,39 +7,14 @@ if(like.isMaster) {
   return;
 }
 
-//only for native cluster, reload in case of failure like uncaught exception:
+//only for native cluster, in case of failure like uncaught exception:
 like.fallback = true; //default true -> like.reload() and false -> like.exit()
 
 // default exit code when there is a uncaught exception
 like.exitCode.exception = 1; // default 1, set as false to disable exit code setting
-/*
-normally when you do process.on('uncaughtException', ...) the exit code becomes zero
-because you are handling the exception so "there is no error"
-in that case, if you want to exit as failure you need to set the exit code manually
 
-but when you do like.handle('uncaughtException', ...) with default settings
-the exit code will be setted as 1 to keep the right behaviour
-
-if you want to keep the original behaviour of node just do:
-like.exitCode.exception = false;
-*/
-
-// default exit code when there is a uncaught exception
+// default exit code when there is an unhandled rejection
 like.exitCode.rejection = 1; // default 1, set as false to disable exit code setting
-/*
-unhandled rejection occurs when a promise fail without catch, you see from node something like:
-"Unhandled promise rejections are deprecated. In the future,
-promise rejections that are not handled will terminate the Node.js process with a non-zero exit code."
-in other words: in the future, unhandled rejection will act same as uncaught exception
-
-for the moment doing process.on('unhandledRejection', ...) just catch promises
-
-but when you do like.handle('unhandledRejection', ...) with default settings
-the exit code will be setted as 1 to keep the right behaviour
-
-if you want to keep the original behaviour of node just do:
-like.exitCode.rejection = false;
-*/
 
 const app = require('express')();
 
