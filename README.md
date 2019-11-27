@@ -49,7 +49,6 @@ Reload or SIGHUP in single process will just exit.
 
 #### Description
 It was made to combine with [like-server](https://github.com/LuKks/like-server).\
-`'terminate'` and `'cleanup'` are async except against `process.exit()`.\
 Using pm2 will send the ready signal when all servers are listening.\
 Using native cluster there is also an internal ready signal.\
 Handling uncaughtException or unhandledRejection the default exitCode is 1.
