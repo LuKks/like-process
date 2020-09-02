@@ -189,8 +189,8 @@ function sendReady () {
 }
 
 process.on('SIGTERM', like.exit); // swarm, k8s, systemd, etc
-if (process.env.PM2_HOME && process.env.exec_mode === 'cluster_mode') {
-  process.on('SIGINT', like.exit); // pm2 cluster
+if (process.env.PM2_HOME) {
+  process.on('SIGINT', like.exit); // pm2 cluster and fork
 }
 process.on('SIGHUP', like.reload); // native cluster, systemd, etc
 

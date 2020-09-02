@@ -23,5 +23,19 @@ like.handle([serverA, 'uncaughtException'], (evt, arg1) => {
   }
 });
 
-//start as cluster: pm2 start pm2_cluster.js -i 2 --wait-ready
-//reload when you want: pm2 reload pm2_cluster
+// [cluster]
+// start as cluster:
+// pm2 start pm2_cluster_fork.js -i 2 --wait-ready
+
+// reload when you want:
+// pm2 reload pm2_cluster_fork.js
+
+// [fork]
+// start as fork:
+// pm2 start pm2_cluster_fork.js --kill-timeout 300000
+
+// restart when you want:
+// pm2 restart pm2_cluster_fork.js
+
+// pm2 enforces a kill-timeout that we don't want
+// so you should set it high like 300000ms (5 minutes)

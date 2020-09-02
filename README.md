@@ -31,7 +31,7 @@ npm i like-process
 ## Features
 #### Handled signals by default:
 - SIGTERM exit for docker, k8s, etc.
-- SIGINT exit only when pm2 cluster.
+- SIGINT exit for pm2 cluster and fork.
 - SIGHUP reload for native cluster.
 
 Reload or SIGHUP in single process will just exit.
@@ -84,6 +84,12 @@ in that way the process will reload or exit for demonstration purposes.
 
 Most examples uses terminate and cleanup events, examples using states:\
 [examples/noncluster_loop.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_loop.js) and [examples/noncluster_error.js](https://github.com/LuKks/like-process/blob/master/examples/noncluster_error.js)
+
+Examples for PM2 cluster and fork: [examples/pm2_cluster_fork.js](https://github.com/LuKks/like-process/blob/master/examples/pm2_cluster_fork.js)
+
+## PM2 commands
+Cluster: `pm2 start app.js -i 2 --wait-ready`\
+Fork: `pm2 start app.js --kill-timeout 300000`
 
 ## How it works?
 There are too much ways to use it due cluster and more situations.\
