@@ -22,7 +22,7 @@ like.isMaster = cluster.isMaster;
 like.isWorker = cluster.isWorker;
 like.isCluster = cluster.isWorker; // is worker or master with at least 1 fork
 
-let servers = [];
+let handlers = [];
 let immediateReadyId;
 
 like.fork = function (env) {
@@ -90,8 +90,8 @@ function exit (worker) {
   if (worker) {
     worker.disconnect();
   } else {
-    for (let i = 0; i < servers.length; i++) {
-      servers[i].close();
+    for (let i = 0; i < handlers.length; i++) {
+      handlers[i].close();
     }
   }
 }
@@ -120,8 +120,8 @@ like.handle = function (events, callback) {
     if (typeof events[k] === 'object') {
       let server = events[k];
 
-      if (servers.indexOf(server) === -1) {
-        servers.push(server);
+      if (handlers.indexOf(server) === -1) {
+        handlers.push(server);
 
         if (!server.listening) {
           server.once('listening', immediateReady);
@@ -150,7 +150,7 @@ function handler (callback, event, arg1, arg2) {
 
   // server closed
   if (event === 'server') {
-    servers.splice(servers.indexOf(arg1), 1);
+    handlers.splice(handlers.indexOf(arg1), 1);
   }
   
   // wasn't manually, for example, was an uncaught exception
@@ -159,7 +159,7 @@ function handler (callback, event, arg1, arg2) {
   }
 
   // the first event without servers listening or forced exit will turn cleanup
-  if (!like.cleanup && (!servers.length || event === 'exit')) {
+  if (!like.cleanup && (!handlers.length || event === 'exit')) {
     like.cleanup = true;
     like.emit('cleanup');
   }
@@ -168,8 +168,8 @@ function handler (callback, event, arg1, arg2) {
 }
 
 function immediateReady () {
-  for (let i = 0; i < servers.length; i++) {
-    if (!servers[i].listening) {
+  for (let i = 0; i < handlers.length; i++) {
+    if (!handlers[i].listening) {
       return;
     }
   }
@@ -188,6 +188,10 @@ function sendReady () {
   }
 }
 
+// bug: systemd sent sighup but it doesn't fire cleanup!!!!!
+// bug: systemd sent sighup but it doesn't fire cleanup!!!!!
+// bug: systemd sent sighup but it doesn't fire cleanup!!!!!
+// bug: systemd sent sighup but it doesn't fire cleanup!!!!!
 process.on('SIGTERM', like.exit); // swarm, k8s, systemd, etc
 if (process.env.PM2_HOME) {
   process.on('SIGINT', like.exit); // pm2 cluster and fork
