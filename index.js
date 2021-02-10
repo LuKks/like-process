@@ -90,6 +90,11 @@ function exit (worker) {
   if (worker) {
     worker.disconnect();
   } else {
+    if (!servers.length) {
+      // just to emit cleanup
+      handler.bind(null, () => {}, '');
+    }
+
     for (let i = 0; i < servers.length; i++) {
       servers[i].close();
     }
