@@ -92,7 +92,7 @@ function exit (worker) {
   } else {
     if (!servers.length) {
       // just to emit cleanup
-      handler.bind(null, () => {}, '');
+      handler.bind(null, () => {}, '')();
     }
 
     for (let i = 0; i < servers.length; i++) {
